@@ -1,0 +1,76 @@
+name: build
+
+on: [workflow_dispatch, push]
+
+env:
+  # official Telegram-Android 13.2.2; change this line to move to another version
+  TELEGRAM_COMMIT: 21f7d109da6ab3506c9e9577f98c6a38771ab335
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+
+    steps:
+      - name: SoFntGram sources
+        uses: actions/checkout@v4
+
+      - name: official Telegram sources (with submodules)
+        uses: actions/checkout@v4
+        with:
+          repository: DrKLO/Telegram
+          ref: ${{ env.TELEGRAM_COMMIT }}
+          path: tg
+          submodules: recursive
+
+      - name: free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/powershell "$ANDROID_HOME/system-images"
+          sudo apt-get clean
+          df -h /
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+          cache-dependency-path: "tg/**/*.gradle*"
+
+      - name: accept licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: signing key
+        env:
+          SIGNING_KEYSTORE_B64: ${{ secrets.SIGNING_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$SIGNING_KEYSTORE_B64" ]; then
+            echo "$SIGNING_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/sofnt.keystore"
+            echo "SOFNT_KEYSTORE_FILE=$RUNNER_TEMP/sofnt.keystore" >> "$GITHUB_ENV"
+          fi
+
+      - name: apply SoFntGram
+        working-directory: tg
+        env:
+          SOFNT_APP_ID: ${{ secrets.APP_ID }}
+          SOFNT_APP_HASH: ${{ secrets.APP_HASH }}
+          SOFNT_KEYSTORE_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          cp -r ../overlay/. .
+          python3 ../sofnt/prepare.py
+
+      - name: build
+        working-directory: tg
+        run: |
+          chmod +x gradlew
+          ./gradlew :TMessagesProj_App:assembleAfatDebug --no-daemon
+
+      - name: memory and disk after build
+        if: always()
+        run: |
+          free -h
+          df -h /
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sofnt-apk
+          path: tg/TMessagesProj_App/build/outputs/apk/**/*.apk
