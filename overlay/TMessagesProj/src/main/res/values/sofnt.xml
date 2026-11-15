@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="SofntChangedBadge">Changed in SoFntGram</string>
+    <string name="SofntOriginalBadge">Original Telegram value</string>
+    <string name="SofntEditPhone">Change displayed number</string>
+    <string name="SofntEditPhoneInfo">Shown only in SoFntGram. The real number in Telegram does not change.</string>
+    <string name="SofntPhoneHint">Number, digits only</string>
+    <string name="SofntReset">Reset</string>
+    <string name="SofntSettings">SoFntGram Settings</string>
+    <string name="SofntSettingsProfile">Profile</string>
+    <string name="SofntSettingsAbout">About</string>
+    <string name="SofntStreamerMode">Streamer mode</string>
+    <string name="SofntStreamerModeInfo">Hides your phone number on screen while you record or share it.</string>
+    <string name="SofntPhoneAsTelegram">same as in Telegram</string>
+    <string name="SofntVersion">Version</string>
+    <string name="SofntAboutInfo">More settings (history, chat archive, cache) appear here together with their features.</string>
+    <string name="SofntIconDefault">SoFntGram</string>
+    <string name="SofntIconMono">SoFntGram B/W</string>
+    <string name="SofntIconMonoLight">SoFntGram B/W light</string>
+    <string name="SofntEditPhoneAsk">Change number?</string>
+    <string name="SofntEditUsernamesAsk">Change usernames?</string>
+    <string name="SofntEditInfo">The change is shown only in SoFntGram. Your real data in Telegram stays as it is.</string>
+    <string name="SofntEditUsernames">Additional usernames</string>
+    <string name="SofntEditUsernamesInfo">Usernames that exist only in SoFntGram, separated by commas. Your real username changes the usual way, in Telegram.</string>
+    <string name="SofntUsernamesHint">@name1, @name2</string>
+    <string name="SofntUsernameHint">username</string>
+    <string name="SofntYourValue">Your value</string>
+    <string name="SofntOriginalValue">Original value</string>
+    <string name="SofntOriginalUsername">Original username</string>
+    <string name="SofntAlsoLeadsTo">Where else it leads</string>
+    <string name="SofntNoOtherHolders">No other accounts yet</string>
+    <string name="SofntNoneSet">not set</string>
+</resources>
