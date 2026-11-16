@@ -26,6 +26,18 @@ def sub_once(path, pattern, repl, flags=0, required=True):
     if n:
         write(path, new)
 
+
+# 0. our strings must live inside the official strings.xml files: the build collects translations only from there
+#    (a separate file would give "LOC_ERR:null" at run time)
+here = os.path.dirname(os.path.abspath(__file__))
+for folder, snippet in (("values", "strings_en.xml"), ("values-ru", "strings_ru.xml")):
+    target = "TMessagesProj/src/main/res/%s/strings.xml" % folder
+    text = read(target)
+    if 'name="SofntSettings"' not in text:
+        add = read(os.path.join(here, snippet))
+        i = text.rindex("</resources>")
+        write(target, text[:i] + "    <!-- SoFntGram -->\n" + add + text[i:])
+
 # 1. application id and signing key (our own key replaces Telegram's public test key)
 sub_once("gradle.properties", r"^APP_PACKAGE=.*$", "APP_PACKAGE=" + PACKAGE, re.M)
 ks_file, ks_pass = os.environ.get("SOFNT_KEYSTORE_FILE"), os.environ.get("SOFNT_KEYSTORE_PASSWORD")
@@ -201,6 +213,16 @@ patch(PA, "    private void updateRowsIds() {\n",
       "        return true;\n    }\n\n"
       "    private void sofntRefresh() {\n        updateRowsIds();\n        if (listAdapter != null) {\n            listAdapter.notifyDataSetChanged();\n        }\n    }\n\n"
       "    private void updateRowsIds() {\n", M)
+
+
+# the Settings tab is SettingsActivity: our entry goes first
+SA = J + "ui/SettingsActivity.java"
+patch(SA, "        items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account,",
+      "        items.add(SettingCell.Factory.of(100, 0xFFFD9835, 0xFFFC6302, R.drawable.sofnt_settings_letters, getString(R.string.SofntSettings)));\n"
+      "        items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account,", M)
+patch(SA, "            case 1:\n                presentSettingFragment(new UserInfoActivity());\n                break;\n",
+      "            case 100:\n                presentSettingFragment(new com.sofnt.messenger.ui.SofntSettingsActivity());\n                break;\n"
+      "            case 1:\n                presentSettingFragment(new UserInfoActivity());\n                break;\n", M)
 
 # app icons: SoFntGram first (colour and black-and-white), every icon selectable without Premium
 LI = J + "ui/LauncherIconController.java"
