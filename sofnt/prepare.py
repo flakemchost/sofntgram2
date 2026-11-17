@@ -30,6 +30,10 @@ def sub_once(path, pattern, repl, flags=0, required=True):
 # 0. our strings must live inside the official strings.xml files: the build collects translations only from there
 #    (a separate file would give "LOC_ERR:null" at run time)
 here = os.path.dirname(os.path.abspath(__file__))
+for folder in ("values", "values-ru"):
+    stale = "TMessagesProj/src/main/res/%s/sofnt.xml" % folder
+    if os.path.exists(stale):
+        os.remove(stale)
 for folder, snippet in (("values", "strings_en.xml"), ("values-ru", "strings_ru.xml")):
     target = "TMessagesProj/src/main/res/%s/strings.xml" % folder
     text = read(target)
@@ -223,6 +227,12 @@ patch(SA, "        items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE
 patch(SA, "            case 1:\n                presentSettingFragment(new UserInfoActivity());\n                break;\n",
       "            case 100:\n                presentSettingFragment(new com.sofnt.messenger.ui.SofntSettingsActivity());\n                break;\n"
       "            case 1:\n                presentSettingFragment(new UserInfoActivity());\n                break;\n", M)
+
+
+# the native libraries are built by the TMessagesProj library module, so the ABI filter has to be there
+patch("TMessagesProj/build.gradle",
+      "        multiDexEnabled true\n\n        externalNativeBuild {\n            cmake {\n                version '3.22.1'",
+      "        multiDexEnabled true\n\n        ndk {\n            abiFilters \"arm64-v8a\"\n        }\n\n        externalNativeBuild {\n            cmake {\n                version '3.22.1'", M)
 
 # app icons: SoFntGram first (colour and black-and-white), every icon selectable without Premium
 LI = J + "ui/LauncherIconController.java"
